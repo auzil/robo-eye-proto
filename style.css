@@ -1,0 +1,251 @@
+:root {
+  --bg: #0d0f13;
+  --panel: #151920;
+  --panel-2: #1b2029;
+  --line: #262c37;
+  --text: #d9dee7;
+  --muted: #7d8696;
+  --accent: #39c2e3;
+  --accent-dim: #1f6f83;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.mono { font-family: var(--mono); }
+
+/* ---------- top bar ---------- */
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand h1 { margin: 0; font-size: 16px; letter-spacing: 0.04em; }
+.brand .sub { color: var(--muted); font-size: 12px; }
+.brand .dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 10px var(--accent);
+  align-self: center;
+}
+.stats { display: flex; gap: 18px; font-family: var(--mono); font-size: 13px; }
+.stats .k { color: var(--muted); margin-right: 6px; }
+.stats .v { display: inline-block; min-width: 4.5em; color: var(--text); }
+
+/* ---------- stage with the eyes ---------- */
+.stage {
+  padding: 28px 16px 18px;
+  background: radial-gradient(ellipse at center, #161a22 0%, var(--bg) 70%);
+  overflow-x: auto;            /* wide rows (3 eyes at 3×) scroll instead of clipping */
+}
+.eyes {
+  display: flex;
+  gap: 36px;
+  align-items: center;
+  width: max-content;
+  margin: 0 auto;              /* centered when it fits, left-aligned + scrollable when not */
+}
+
+/* Each canvas is 240x240 real pixels; CSS scales it by an integer factor.
+   `pixelated` keeps hard pixel edges so you see what the panel will show. */
+.eyes canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  outline: 1px solid #1d222b;   /* shows the square pixel area around the round panel */
+  background: #000;
+}
+.eyes { padding: 14px 0; }
+.eye { position: relative; isolation: isolate; }
+
+/* ---- "Glass dome" preview (CSS only, never part of the 240x240 pixels) ----
+   Simulates the round module housing + a glass cabochon over the display. */
+.eyes.dome canvas {
+  border-radius: 50%;            /* the panel is round; hide the square corners */
+  outline: none;
+}
+.eyes.dome .eye::before {        /* black housing / bezel ring */
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0a0a0b 70%, #1b1c1f 86%, #070708 100%);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.7), 0 0 0 1px #24262b;
+  z-index: -1;
+}
+.eyes.dome .eye::after {         /* glass: soft gloss, rim darkening, edge refraction */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 30% 18% at 33% 20%, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 64%, rgba(0, 0, 0, 0.22) 86%, rgba(0, 0, 0, 0.65) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    inset 0 -8px 18px rgba(0, 0, 0, 0.35),
+    0 0 26px rgba(170, 195, 230, 0.10);   /* faint glow of the backlight */
+}
+
+.readout {
+  margin-top: 10px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: pre;
+}
+
+/* ---------- controls ---------- */
+.panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+  padding: 16px 20px 28px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.group {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.group h2 {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.ctl {
+  display: grid;
+  grid-template-columns: 110px 1fr 92px;
+  gap: 10px;
+  align-items: center;
+  margin: 8px 0;
+}
+.ctl output { font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: right; }
+.ctl.check { grid-template-columns: auto 1fr; }
+.ctl-pair { display: flex; gap: 18px; margin-top: 10px; }
+.inline { display: inline-flex; gap: 8px; align-items: center; color: var(--muted); }
+
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+input[type="checkbox"] { accent-color: var(--accent); }
+input[type="color"] {
+  width: 100%; height: 26px; padding: 0 2px;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--panel-2);
+}
+input[type="number"], select, button {
+  font: inherit;
+  color: var(--text);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 9px;
+}
+input[type="number"] { width: 90px; }
+button { cursor: pointer; }
+button:hover { border-color: var(--accent-dim); }
+button:active { background: var(--accent-dim); }
+
+/* segmented mode switch */
+.seg {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.seg label {
+  flex: 1;
+  text-align: center;
+  padding: 7px 0;
+  cursor: pointer;
+  color: var(--muted);
+  border-right: 1px solid var(--line);
+}
+.seg label:last-child { border-right: 0; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label:has(input:checked) { background: var(--accent-dim); color: #fff; }
+
+.row-btns { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 14px; }
+
+/* virtual joystick */
+.joy-wrap { display: flex; gap: 16px; align-items: center; }
+.joy-base {
+  position: relative;
+  flex: none;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #20262f 0%, #12161c 70%);
+  border: 1px solid var(--line);
+  touch-action: none;           /* stop the page from scrolling while dragging on touch */
+  cursor: grab;
+}
+.joy-base::before, .joy-base::after {   /* crosshair */
+  content: "";
+  position: absolute;
+  background: var(--line);
+}
+.joy-base::before { left: 50%; top: 10%; bottom: 10%; width: 1px; }
+.joy-base::after  { top: 50%; left: 10%; right: 10%; height: 1px; }
+.joy-knob {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 48px; height: 48px;
+  margin: -24px 0 0 -24px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #4fd3f0, #1f6f83);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+  z-index: 1;
+  transition: transform 120ms ease-out;   /* spring back when released */
+}
+.joy-base.dragging { cursor: grabbing; }
+.joy-base.dragging .joy-knob { transition: none; }
+.joy-info { display: flex; flex-direction: column; gap: 6px; }
+.hint { color: var(--muted); font-size: 12px; }
+.off-hint { display: none; color: #c9a657; }
+.joy-wrap.disabled .joy-base { opacity: 0.4; }
+.joy-wrap.disabled .off-hint { display: block; }
+
+kbd {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--panel-2);
+}
+
+@media (max-width: 700px) {
+  .stats { gap: 10px; font-size: 12px; }
+  .ctl { grid-template-columns: 96px 1fr 56px; }
+}
+
+/* glitch controls */
+.glitch-group h2 { color: #e05fc4; }
+button.neon {
+  border-color: #b23aa0;
+  color: #ffd6f6;
+  background: linear-gradient(90deg, #2a0f28, #0f2530);
+  text-shadow: -1px 0 #ff2bd6, 1px 0 #00f0ff;
+}
+button.neon:hover { border-color: #00f0ff; }

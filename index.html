@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robot Eye Prototype</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <h1>Robot Eye</h1>
+      <span class="sub">GC9A01 · 240×240 · RGB565 prototype</span>
+    </div>
+    <div class="stats">
+      <div><span class="k">FPS</span><span class="v" id="statFps">–</span></div>
+      <div><span class="k">logic</span><span class="v" id="statLogic">–</span></div>
+      <div><span class="k">render</span><span class="v" id="statRender">–</span></div>
+      <div><span class="k">frame</span><span class="v" id="statFrame">–</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage" id="stage">
+      <div class="eyes dome" id="eyes"><!-- canvases are created by main.js --></div>
+      <div class="readout" id="readout">–</div>
+    </section>
+
+    <section class="panel">
+      <div class="group">
+        <h2>Input</h2>
+        <div class="seg" role="radiogroup" aria-label="Input mode">
+          <label><input type="radio" name="mode" value="0"> Mouse</label>
+          <label><input type="radio" name="mode" value="1"> Joystick</label>
+          <label><input type="radio" name="mode" value="2" checked> Auto</label>
+        </div>
+
+        <div class="joy-wrap" id="joyWrap">
+          <div class="joy-base" id="joyBase"><div class="joy-knob" id="joyKnob"></div></div>
+          <div class="joy-info">
+            <div class="mono" id="joyValues">x 0.00 · y 0.00</div>
+            <div class="hint">Drag the stick or use <kbd>WASD</kbd>/<kbd>←↑→↓</kbd>.<br><kbd>Space</kbd> blinks, <kbd>G</kbd> glitches, in any mode.</div>
+            <div class="hint off-hint">Grabbing the stick or pressing a direction key switches to Joystick mode.</div>
+          </div>
+        </div>
+
+        <div class="row-btns">
+          <button type="button" id="btnBlink">Blink</button>
+          <label class="inline">Seed <input type="number" id="seed" value="1234" min="1" step="1"></label>
+          <button type="button" id="btnReset">Reset</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>Look</h2>
+        <label class="ctl"><span>Iris size</span><input type="range" id="irisSize" min="30" max="80" step="1" value="48"><output id="irisSizeOut"></output></label>
+        <label class="ctl"><span>Pupil base</span><input type="range" id="pupilBase" min="0.2" max="0.7" step="0.01" value="0.42"><output id="pupilBaseOut"></output></label>
+        <label class="ctl"><span>Iris color</span><input type="color" id="irisColor" value="#7a95b2"><output id="irisColorOut" class="mono"></output></label>
+        <label class="ctl"><span>Sclera color</span><input type="color" id="scleraColor" value="#eaeff4"><output id="scleraColorOut" class="mono"></output></label>
+        <label class="ctl"><span>Veins</span><input type="range" id="veins" min="0" max="1" step="0.05" value="0.5"><output id="veinsOut"></output></label>
+        <label class="ctl"><span>Eyelids</span>
+          <select id="lidStyle">
+            <option value="black" selected>Black (blends into bezel)</option>
+            <option value="skin">Skin</option>
+            <option value="metal">Metal</option>
+          </select><output></output>
+        </label>
+        <label class="ctl check"><input type="checkbox" id="catchlight" checked> <span>Catchlight (rendered highlight)</span></label>
+        <label class="ctl check"><input type="checkbox" id="dome" checked> <span>Glass dome look <em class="hint">(browser preview only)</em></span></label>
+        <label class="ctl check"><input type="checkbox" id="rgb565"> <span>RGB565 preview</span></label>
+        <div class="ctl-pair">
+          <label class="inline">Scale
+            <select id="scale"><option value="1">1×</option><option value="2" selected>2×</option><option value="3">3×</option></select>
+          </label>
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>Behavior</h2>
+        <label class="ctl"><span>Eye speed</span><input type="range" id="speed" min="0.25" max="3" step="0.05" value="1"><output id="speedOut"></output></label>
+        <label class="ctl"><span>Saccade freq.</span><input type="range" id="saccadeRate" min="0.2" max="3" step="0.05" value="1"><output id="saccadeRateOut"></output></label>
+        <label class="ctl check"><input type="checkbox" id="blinkEnabled"> <span>Blinking <em class="hint">(automatic; Space still blinks)</em></span></label>
+        <label class="ctl"><span>Blink freq.</span><input type="range" id="blinkRate" min="0.2" max="3" step="0.05" value="1"><output id="blinkRateOut"></output></label>
+        <label class="ctl"><span>Light level</span><input type="range" id="light" min="0" max="1" step="0.01" value="0.5"><output id="lightOut"></output></label>
+        <label class="ctl"><span>FPS cap</span><input type="range" id="fpsCap" min="10" max="60" step="1" value="30"><output id="fpsCapOut"></output></label>
+      </div>
+
+      <div class="group glitch-group">
+        <h2>Cyberpunk glitches</h2>
+        <label class="ctl check"><input type="checkbox" id="glitchEnabled" checked> <span>Glitches <em class="hint">(automatic; G / button still trigger)</em></span></label>
+        <label class="ctl"><span>Glitch freq.</span><input type="range" id="glitchRate" min="0.2" max="4" step="0.05" value="1"><output id="glitchRateOut"></output></label>
+        <label class="ctl"><span>Intensity</span><input type="range" id="glitchIntensity" min="0.1" max="1" step="0.05" value="0.6"><output id="glitchIntensityOut"></output></label>
+        <div class="row-btns">
+          <button type="button" id="btnGlitch" class="neon">Glitch now</button>
+          <span class="hint mono" id="glitchInfo">–</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Classic scripts (not ES modules) so the page works from file:// -->
+  <script src="eye-logic.js"></script>
+  <script src="eye-render.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
